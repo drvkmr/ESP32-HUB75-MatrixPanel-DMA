@@ -246,24 +246,14 @@
     };
     gdma_apply_strategy(dma_chan, &strategy_config);
 
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 0)
-    gdma_transfer_config_t transfer_config = {
-#ifdef SPIRAM_DMA_BUFFER
-      .max_data_burst_size = 64,
-      .access_ext_mem = true
-#else
-      .max_data_burst_size = 32,
-      .access_ext_mem = false
-#endif
-    };
-    gdma_config_transfer(dma_chan, &transfer_config);
-#else
+    // Use gdma_transfer_ability_t for compatibility with all ESP-IDF 5.x (including
+    // Arduino cores that ship older IDF, e.g. platform-espressif32). The newer
+    // gdma_transfer_config_t / gdma_config_transfer API is not available in 5.1/5.2.
     gdma_transfer_ability_t ability = {
         .sram_trans_align = 32,
         .psram_trans_align = 64,
     };
     gdma_set_transfer_ability(dma_chan, &ability);
-#endif
 
 /*
     // Enable DMA transfer callback
